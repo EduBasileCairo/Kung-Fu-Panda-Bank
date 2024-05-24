@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuenta Bancaria</title>
+<style>
+    .gridHeader {
+            display: grid;
+            grid-template-columns: 1fr 7fr 1fr;
+            grid-row: 5fr 1fr;
+            background-color: aqua;
+        }
+
+        .encabezado {
+            text-align: center;
+            font-size: xx-large;
+            padding: 15px;
+        }
+
+        .botones {
+            background-color: lightsteelblue;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+        }
+</style>
+</head>
+
+
+<body>
+    <header class="gridHeader">
+        <div class="logo"><img src="KungFuPanda.jpg" alt="Kung Fu Panda"></div>
+        <div class="encabezado"> Kung Fu Panda Bank</div>
+        <div class="botones">
+            <form>
+                <label for="usuario">Usu:</label><br>
+                <input type="text" id="fname" name="fname"><br>
+                <label for="lname">Pass:</label><br>
+                <input type="text" id="lname" name="lname">
+                <input type="submit" value="Submit">
+            </form>
+        </div>
+    </header>
+    <h1>Cuenta Bancaria</h1>
+
+    <label for="fecha">Fecha:</label>
+    <input type="date" id="fecha">
+
+    <label for="cantidad">Cantidad:</label>
+    <input type="number" id="cantidad" min="0">
+
+    <button onclick="realizarOperacion('depositar')">Depositar</button>
+    <button onclick="realizarOperacion('retirar')">Retirar</button>
+
+    <div id="saldo">Saldo actual: $0</div>
+    <div id="movimientosContainer"></div>
+
+    <button onclick="calcularIntereses()">Calcular Intereses</button>
+
+    <p id="intereses">Intereses calculados: $0.00</p>
+<!-- POO -->
+    <script>
+        class BankAccount {
+            constructor(numeroCuenta, titularCuenta, saldo) {
+                this.numeroCuenta = numeroCuenta;
+                this.titularCuenta = titularCuenta;
+                this.saldo = saldo;
+                this.ultimaFecha = null;
+                this.movimientos = [];
+            }
+
+            async depositar(cantidad, fecha) {
+                if (this.ultimaFecha && fecha < this.ultimaFecha) {
+                    alert("La fecha debe ser posterior a la última transacción.");
+                    return;
+                }
+
+                this.saldo += cantidad;
+                this.ultimaFecha = fecha;
+                this.registrarMovimiento('Depósito', cantidad, fecha, this.saldo);
+                await actualizarSaldo();
+                await actualizarMovimientos();
+            }
+
+            async retirar(cantidad, fecha) {
+                if (this.ultimaFecha && fecha < this.ultimaFecha) {
+                    alert("La fecha debe ser posterior a la última transacción.");
+                    return;
+                }
+
+                if (cantidad > 0 && cantidad <= this.saldo) {
+                    this.saldo -= cantidad;
+                    this.ultimaFecha = fecha;
+                    this.registrarMovimiento('Retiro', cantidad, fecha, this.saldo);
+                    await actualizarSaldo();
+                    await actualizarMovimientos();
+                } else {
+                    alert("Cantidad no válida o saldo insuficiente.");
+                }
+            }
+
+            obtenerSaldo() {
+                return this.saldo;
+            }
+
+            registrarMovimiento(operacion, cantidad, fecha, saldo) {
+                this.movimientos.push({ operacion, cantidad, fecha, saldo });
+            }
+        }
+
+        const cuenta = new BankAccount(123456, 'Titular de Prueba', 0);
+
+        async function realizarOperacion(operacion) {
+            const cantidadInput = document.getElementById('cantidad');
+            const cantidad = parseFloat(cantidadInput.value);
+            const fechaInput = document.getElementById('fecha');
+            const fecha = fechaInput.value;
+
+            if (!isNaN(cantidad) && isValidDate(fecha) && cantidad > 0) {
+                if (operacion === 'depositar') {
+                    await cuenta.depositar(cantidad, fecha);
+                } else if (operacion === 'retirar') {
+                    await cuenta.retirar(cantidad, fecha);
+                } else {
+                    alert('Operación no válida');
+                }
+            } else {
+                alert('Cantidad o fecha no válida');
+            }
+        }
+
+        async function actualizarSaldo() {
+            const saldoElement = document.getElementById('saldo');
+            saldoElement.textContent = `Saldo actual: $${cuenta.obtenerSaldo()}`;
+        }
+
+        async function actualizarMovimientos() {
+            const movimientosContainer = document.getElementById('movimientosContainer');
+            movimientosContainer.innerHTML = '';
+
+    cuenta.movimientos.forEach(movimiento => {
+                const p = document.createElement('p');
+                p.textContent = `${movimiento.fecha} - ${movimiento.operacion}: Cantidad: ${movimiento.cantidad}, Saldo: ${movimiento.saldo}`;
+                movimientosContainer.appendChild(p);
+    });
+}
+
+        function isValidDate(dateString) {
+            const regex = /^\d{4}-\d{2}-\d{2}$/;
+            return dateString.match(regex) !== null;
+        }
+
+        // calcularIntereses(tasaAnual) {
+        //     const diasEnMes = 30;
+        //     let interesesTotales = 0;
+        //     let diasAcumulados = 0;
+
+        //     for (let i = 0; i < this.movimientos.length - 1; i++) {
+        //         const movimientoActual = this.movimientos[i];
+        //         const movimientoSiguiente = this.movimientos[i + 1];
+
+        //         const diasEntreMovimientos = diasDiferencia(movimientoActual.fecha, movimientoSiguiente.fecha);
+        //         const saldoPromedio = movimientoActual.saldo;
+
+        //         diasAcumulados += diasEntreMovimientos;
+        //         interesesTotales += diasEntreMovimientos * saldoPromedio;
+        //     }
+
+        //     const tasaDiaria = tasaAnual / 360;
+        //     const interesesCalculados = interesesTotales * tasaDiaria;
+
+        //     // Muestra los intereses en una etiqueta <p>
+        //     const interesesElement = document.getElementById('intereses');
+        //     interesesElement.textContent = `Intereses calculados: $${interesesCalculados.toFixed(2)}`;
+        // }
+
+
+        // Función para calcular la diferencia en días entre dos fechas
+        function diasDiferencia(fechaInicio, fechaFin) {
+            const unDia = 24 * 60 * 60 * 1000; // horas * minutos * segundos * milisegundos
+            const inicio = new Date(fechaInicio);
+            const fin = new Date(fechaFin);
+
+            return Math.round(Math.abs((inicio - fin) / unDia));
+        }
+
+
+    </script>
+
+</body>
+
+</html>

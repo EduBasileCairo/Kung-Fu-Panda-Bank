@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio Banco Kunfu Panda</title>
+</head>
+
+<body>
+    <script>
+
+        /* Crea una clase llamada "BankAccount" (Cuenta Bancaria) que tenga las siguientes propiedades y métodos:
+        Propiedades: número de cuenta, titular de la cuenta, saldo.
+        Métodos:
+        depositar(cantidad) que incremente el saldo de la cuenta en la cantidad especificada.
+        retirar(cantidad) que disminuya el saldo de la cuenta en la cantidad especificada.
+        obtenerSaldo() que devuelva el saldo actual de la cuenta.
+        Luego, crea una clase adicional llamada "SavingsAccount" (Cuenta de Ahorros) que herede 
+        de la clase "BankAccount". Esta clase debe tener propiedades y métodos específicos:
+        Clase "SavingsAccount":
+        Propiedades: tasa de interés.
+        Métodos:
+        calcularInteres() que calcule y devuelva el interés ganado en base al saldo y la tasa de interés.
+        obtenerSaldoTotal() que devuelva el saldo actual más el interés ganado.
+        Crea una instancia de la clase "SavingsAccount" con valores para las propiedades y realiza 
+        operaciones de depósito, retiro y obtención de saldo. Luego, calcula el interés ganado y 
+        obtén el saldo total.
+        */
+
+
+        class BankAccount {
+            constructor(numeroCuenta, titularCuenta, saldo) {
+                this.numeroCuenta = numeroCuenta;
+                this.titularCuenta = titularCuenta;
+                this.saldo = saldo;
+            }
+
+            depositar(cantidad) {
+                this.saldo += cantidad;
+            }
+
+            retirar(cantidad) {
+                if (cantidad <= this.saldo) {
+                    this.saldo -= cantidad;
+                } else {
+                    console.log("Saldo insuficiente.");
+                }
+            }
+
+            obtenerSaldo() {
+                return this.saldo;
+            }
+        }
+
+        class SavingsAccount extends BankAccount {
+            constructor(numeroCuenta, titularCuenta, saldo, tasaInteres) {
+                super(numeroCuenta, titularCuenta, saldo);
+                this.tasaInteres = tasaInteres;
+            }
+
+            calcularInteres() {
+                return this.saldo * this.tasaInteres;
+            }
+
+            obtenerSaldoTotal() {
+                return this.saldo + this.calcularInteres();
+            }
+        }
+
+        // Crear instancia de la clase SavingsAccount
+        const cuentaAhorros = new SavingsAccount("123456789", "Juan Pérez", 1000, 0.05);
+
+        // Realizar operaciones en la cuenta de ahorros
+        cuentaAhorros.depositar(500);
+        cuentaAhorros.retirar(200);
+
+        // Obtener saldo y saldo total
+        console.log("Saldo actual:", cuentaAhorros.obtenerSaldo());
+        console.log("Interés ganado:", cuentaAhorros.calcularInteres());
+        console.log("Saldo total:", cuentaAhorros.obtenerSaldoTotal());
+
+
+    </script>
+</body>
+
+</html>
